@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "conway.h"
 
 #define MAPSIZEX 800
 #define MAPSIZEY 720
@@ -37,8 +38,28 @@ void UI::load_game(){
             Fl_Button* cell = new Fl_Button(CELLX + (SPACING * i), CELLY + (SPACING * j), CELLSIZEX, CELLSIZEY);
             cell->box(FL_FLAT_BOX);
             cell->clear_visible_focus();
-            cell->color(fl_rgb_color(60, 60, 60));
+            cell->color(fl_rgb_color(60, 60, 60));//gris
             cells.push_back(cell);
+            //para cambiar el estado de la celda al recibir el click
+            cell->callback([](Fl_Widget* w, void* user_data){
+                Fl_Button* btn = static_cast<Fl_Button*>(w);
+                UI* game = static_cast<UI*>(user_data);
+
+                int clicked_index = -1;
+                for (int k = 0; k < game->cells.size(); ++k) {
+                    if (game->cells[k] == btn) {
+                        clicked_index = k;
+                        break;
+                    }
+                }
+
+                if (clicked_index != -1) {
+                    unsigned char* mat = get_matrix();
+                    mat[clicked_index] ^= 1; // cambia entre 0 y 1
+                    btn->color(mat[clicked_index] ? FL_YELLOW : fl_rgb_color(60, 60, 60));
+                    game->frame->redraw();
+                }
+            }, this);
         }
     }
 
@@ -71,35 +92,27 @@ void UI::load_game(){
 
 
 
-void UI::iterate(){
-    
-    if(!loaded && play){
-        loaded = true;
+void UI::iterate() {
+    if (!loaded && play) {
+        loaded = true; //se marca cargada
+    }
 
-        //CARGAR EL GRID DEL BACK, EJEMPLO:
+    if (play) {
+        next_gen(); // se llama la función en ensamblador que calcula la siguiente generación
+        unsigned char* matrix = get_matrix();
 
-        for(int i = 0; i < CELLNUMBER - 5; ++i){           // <--- INDICA CUALES PONER AMARILAS, SE PUEDE HACER UN IF PARA DEFINIR ENTRE AMARILLO Y GRIS
-            for(int j = 0; j < CELLNUMBER - 5; ++j){
+        for (int i = 0; i < CELLNUMBER; ++i) {
+            for (int j = 0; j < CELLNUMBER; ++j) {
                 int index = i * CELLNUMBER + j;
-                
-
-                                                        //<---- EL IF IRIA EN ESTA LINEA
-
-
-                //LA MATRIZ SE RECORRE COMO UNA LISTA 
-                cells[index]->color(FL_YELLOW);
-
-
-
+                if (matrix[index] == 1)
+                    cells[index]->color(FL_YELLOW);
+                else
+                    cells[index]->color(fl_rgb_color(60, 60, 60));
             }
         }
 
-    } else if(loaded && play){
-
-        //METER LA MATRIZ DE 100 NUMEROS DEL BACK Y MODIFICAR LOS COLORES: AMARILLO PARA 1 Y GRIS PARA 0
-
+        frame->redraw();
     }
-    frame->redraw();
 }
 
 

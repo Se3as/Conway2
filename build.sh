@@ -4,7 +4,7 @@ OUTPUT="game"
 SRC_DIR="src"
 INCLUDE_DIR="include"
 
-SOURCES=$(find "$SRC_DIR" -name '*.cpp')
+SOURCES=$(find "$SRC_DIR" -name '*.cpp' -o -name '*.c')
 
 # Verificaciones
 command -v fltk-config >/dev/null 2>&1 || { echo "❌ FLTK no está instalado. Ejecutá: sudo apt install libfltk1.3-dev"; exit 1; }
@@ -17,16 +17,16 @@ FLTK_LIBS=$(fltk-config --ldflags)
 EXTRA_LIBS="-lfltk_images"
 DEBUG_FLAGS="-g -Og"
 
-echo "Compilando con FLTK..."
+echo "Compilando ensamblador..."
+nasm -f elf64 src/conway.asm -o src/conway.o
 
-g++ $SOURCES -I"$INCLUDE_DIR" $FLTK_FLAGS $FLTK_LIBS $EXTRA_LIBS $DEBUG_FLAGS -o $OUTPUT
+echo "Compilando con FLTK..."
+g++ -no-pie src/conway.o $SOURCES -I"$INCLUDE_DIR" $FLTK_FLAGS $FLTK_LIBS $EXTRA_LIBS $DEBUG_FLAGS -o $OUTPUT
 
 if [ $? -eq 0 ]; then
     echo "✅ Compilado correctamente: ./$OUTPUT"
-
     echo
     ./game
-
 else
     echo "❌ Error de compilación"
 fi

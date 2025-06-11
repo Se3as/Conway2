@@ -1,0 +1,1 @@
+#include "../include/conway.h" //para enlazar
