@@ -1,1 +1,1 @@
-#include "../include/conway.h" //para enlazar
+#include "../include/conway.h" //únicamente para enlazar

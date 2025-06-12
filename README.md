@@ -25,4 +25,5 @@ Authors:
 
 Juan Sebastian Loaiza
 Sergio Solano
+Adrián Arias Vargas
 
