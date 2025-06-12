@@ -55,7 +55,7 @@ void UI::load_game(){
 
                 if (clicked_index != -1) {
                     unsigned char* mat = get_matrix();
-                    mat[clicked_index] ^= 1; // cambia entre 0 y 1
+                    mat[clicked_index] ^= 1; //cambia entre 0 y 1
                     btn->color(mat[clicked_index] ? FL_YELLOW : fl_rgb_color(60, 60, 60));
                     game->frame->redraw();
                 }
@@ -93,33 +93,43 @@ void UI::load_game(){
 
 
 void UI::iterate() {
-    if (!loaded && play) {
-        loaded = true; //se marca cargada
+    if (!loaded || !play) return;
+
+    next_gen();
+
+    unsigned char* matrix = get_matrix();
+    if (!matrix) {
+        fl_alert("Error: matriz es NULL");
+        return;
     }
 
-    if (play) {
-        next_gen(); // se llama la función en ensamblador que calcula la siguiente generación
-        unsigned char* matrix = get_matrix();
-
-        for (int i = 0; i < CELLNUMBER; ++i) {
-            for (int j = 0; j < CELLNUMBER; ++j) {
-                int index = i * CELLNUMBER + j;
-                if (matrix[index] == 1)
-                    cells[index]->color(FL_YELLOW);
-                else
-                    cells[index]->color(fl_rgb_color(60, 60, 60));
-            }
+    for (int i = 0; i < CELLNUMBER; ++i){
+        for (int j = 0; j < CELLNUMBER; ++j){
+            int index = i * CELLNUMBER + j;
+            cells[index]->color(matrix[index] ? FL_YELLOW : fl_rgb_color(60, 60, 60));
         }
-
-        frame->redraw();
     }
+
+    frame->redraw();
 }
 
 
 
 void UI::load_grid(Fl_Widget* w, void* user_data){
     UI* game = static_cast<UI*>(user_data);
-    game->loaded = false;
+    game->stop = true;
+    game->play = false;
+    game->loaded = true;
+    unsigned char* mat = get_matrix(); // se carga la matriz guardada en memoria en conway.asm (.data)
+    for (int i = 0; i < CELLNUMBER; ++i){
+        for (int j = 0; j < CELLNUMBER; ++j){
+            int index = i * CELLNUMBER + j;
+            Fl_Color color = mat[index] ? FL_YELLOW : fl_rgb_color(60, 60, 60);
+            game->cells[index]->color(color);
+        }
+    }
+
+    game->frame->redraw();
 }
 
 void UI::pause_game(Fl_Widget* w, void* user_data){

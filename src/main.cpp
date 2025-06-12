@@ -9,7 +9,7 @@ int main() {
     conway.run();
     conway.show();
 
-    while(!conway.get_start()){
+    while(!conway.get_start() && !conway.get_quit()){
         Fl::wait();
     }
 
